@@ -1,83 +1,67 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: femullao <femullao@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/18 18:18:14 by femullao          #+#    #+#             */
-/*   Updated: 2024/12/23 16:12:49 by femullao         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+#include "pipex.h" 
 
-#include "pipex.h"
 
-// pipex file1 cmd1 cmd2 file2
-
-void first_process(char **av, char**env, int fd[2])
+void first_process(char **av, char **env, int pp[2])
 {
-	int f1;
+	int fd;
+
+	fd = open(av[1], O_RDONLY);
+	if (fd == -1)
+	{
+		if (access(av[1], F_OK) != -1 && access(av[1], R_OK) == -1)
+		{
+			ft_putstr_fd("Permission Denied: ", 2);
+			ft_putendl_fd(av[1], 2);
+			exit(EXIT_FAILURE);
+		}
+
+		ft_putstr_fd("no such file or directory: ", 2);
+		ft_putendl_fd(av[1], 2);
+		exit(EXIT_FAILURE);
+	}
+	close(pp[0]);
+	dup2(fd, 0);
+	dup2(pp[1], 1);
+	close(fd);
+	close(pp[1]);
+	run_command(av[2], env);
+}
+
+void second_process(char **av, char **env, int pp[2])
+{
+	int fd;
+
+	fd = open(av[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+	{
+		ft_putstr_fd("no such file or directory: ", 2);
+		ft_putendl_fd(av[4], 2);
+		return ;
+	}
+	close(pp[1]);
+	dup2(pp[0], 0);
+	dup2(fd, 1);
+	close(pp[0]);
+	close(fd);
+	run_command(av[3], env);
+}
+
+
+int main(int ac, char **av , char **env)
+{
 	pid_t ch;
-
-	f1 = open(av[1], O_RDONLY);
-	if (f1 == -1)
-	{
-		ft_putendl_fd("pipex: no such file or directory: file1", 2);
-		return;
-	}
-	ch = fork();
-	if (ch == 0)
-	{
-		close(fd[0]);
-		dup2(f1, 0);
-		close(f1);
-		dup2(fd[1], 1);
-		close(fd[1]);
-		//run command1;
-		exit(127);
-	}
-	
-}
-
-void second_process(char **av, char **env, int fd[2])
-{
-	int f2;
-	
-	f2 = open(av[4], O_CREAT, O_WRONLY);
-	if (f2 == -1)
-	{
-		ft_putendl_fd("pipex: valla acilmadi : file2", 2);
-		return;
-	}
-	close(fd[1]);
-	dup2(fd[0], 0);
-	close(fd[0]);
-	dup2(av[4],1);
-	close(av[4]);
-	//run command2
-	exit(127);
-}
-
-
-
-
-
-void run_pipex(char **av, char **env, int fd[2])
-{
-	first_process(av,env,fd);
-	second_process(av,env,fd);
-}
-
-
-int main(int ac, char **av, char **env)
-{
 	int fd[2];
-	if (ac != 5)
+	pipe(fd);
+
+	if (ac == 5)
 	{
-		ft_putendl_fd("./pipex file1 cmd1 cmd2 file2", 2);
+		ch = fork();
+		if (ch == 0)
+			first_process(av, env, fd);
+		waitpid(ch, NULL, 0);
+		second_process(av, env, fd);
 	}
-	else
-	{
-		run_pipex(av,env,fd);
-	}
-}
+	ft_putstr_fd("./pipex file1 cmd1 cmd2 file2\n", 2);
+	return (1);
+
+}	
