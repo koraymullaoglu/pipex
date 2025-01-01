@@ -1,7 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipexct.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: femullao <femullao@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/27 15:55:37 by femullao          #+#    #+#             */
+/*   Updated: 2024/12/27 17:14:22 by femullao         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "pipex.h"
 
-void ft_puterror(char *str, int f)
+static void	ft_puterror(char *str, int f)
 {
 	if (f == 0)
 	{
@@ -20,17 +31,16 @@ void ft_puterror(char *str, int f)
 		ft_putstr_fd("command not found: ", 2);
 		ft_putendl_fd(str, 2);
 	}
-
 }
 
-char **get_path(char **env)
+static char	**get_path(char **env)
 {
-	char **r;
-	int i;
+	char	**r;
+	int		i;
 
 	i = 0;
 	r = NULL;
-	while(env && env[i])
+	while (env && env[i])
 	{
 		if (ft_strncmp(env[i], "PATH=", 5) == 0)
 		{
@@ -42,21 +52,22 @@ char **get_path(char **env)
 	return (r);
 }
 
-
-char *check_path(char *cmd, char **env)
+static char	*check_path(char *cmd, char **env)
 {
-	char **paths;
-	char *tmp;
-	char *test;
-	
+	char	**paths;
+	char	*tmp;
+	char	*test;
+
 	paths = get_path(env);
 	while (paths && *paths)
 	{
 		tmp = ft_strjoin(*paths, "/");
 		test = ft_strjoin(tmp, cmd);
 		free(tmp);
-		if (!access(test, X_OK))
+		if (!access(test, X_OK) && !access(test, F_OK))
 			return (test);
+		else if (access(test, X_OK) != 0 && access(test, F_OK) == 0)
+			ft_puterror(test, 1);
 		else
 			free(test);
 		paths++;
@@ -65,11 +76,11 @@ char *check_path(char *cmd, char **env)
 	exit(127);
 }
 
-void run_command(char *cmd, char **env)
+void	run_command(char *cmd, char **env)
 {
-	char **command;
-	char *path;
-	
+	char	**command;
+	char	*path;
+
 	command = ft_split(cmd, ' ');
 	if (ft_strchr(command[0], '/'))
 	{
