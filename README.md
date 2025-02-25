@@ -4,7 +4,7 @@
 
 <p align="center">
 	<img src="https://img.shields.io/badge/status-finished-success?color=%2312bab9&style=flat-square"/>
-	<img src="https://img.shields.io/github/languages/top/jotavare/get_next_line?color=%2312bab9&style=flat-square"/>
+	<img src="https://img.shields.io/github/languages/top/koraymullaoglu/pipex?color=%2312bab9&style=flat-square"/>
 	<a href='https://www.linkedin.com/in/mullaoglukoray' target="_blank"><img alt='Linkedin' src='https://img.shields.io/badge/LinkedIn-100000?style=flat-square&logo=Linkedin&logoColor=white&labelColor=0A66C2&color=0A66C2'/></a>
 </p>
 
